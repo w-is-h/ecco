@@ -115,7 +115,7 @@ class LM(object):
         return tensor
 
     def _generate_token(self, input_ids, past, do_sample: bool, temperature: float, top_k: int, top_p: float,
-                        attribution_flag: Optional[bool]):
+                        attribution_flag: Optional[bool], prediction_id=None):
         """
         Run a forward pass through the model and sample a token.
         """
@@ -125,8 +125,8 @@ class LM(object):
         predict = output.logits
 
         scores = predict[-1:, :]
-
-        prediction_id = sample_output_token(scores, do_sample, temperature, top_k, top_p)
+        if prediction_id:
+            prediction_id = sample_output_token(scores, do_sample, temperature, top_k, top_p)
 
         # prediction_id now has the id of the token we want to output
         # To do feature importance, let's get the actual logit associated with
@@ -174,7 +174,8 @@ class LM(object):
                  get_model_output: Optional[bool] = False,
                  do_sample: Optional[bool] = None,
                  attribution: Optional[bool] = True,
-                 generate: Optional[int] = None):
+                 generate: Optional[int] = None,
+                 prediction_id=prediction_id):
         """
         Generate tokens in response to an input prompt.
         Works with Language models like GPT2, not masked language models like BERT.
@@ -226,7 +227,8 @@ class LM(object):
                                                            temperature=temperature,
                                                            top_k=top_k, top_p=top_p,
                                                            do_sample=do_sample,
-                                                           attribution_flag=attribution)
+                                                           attribution_flag=attribution,
+                                                           prediction_id=prediction_id)
 
             if get_model_output:
                 outputs.append(output)
